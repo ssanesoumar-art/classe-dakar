@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Espace enseignant{% endblock %}
+{% block content %}
+<h1>🧑‍🏫 Espace enseignant</h1>
+<p style="color:var(--mut)">Ajoutez vos idées : leçons, exercices et quiz, pour chaque niveau.</p>
+<div class="chips"><a class="chip {% if not code %}on{% endif %}" href="{% url 'enseignant' %}">Tous les niveaux</a>
+{% for n in niveaux %}<a class="chip {% if code == n.code %}on{% endif %}" href="?niveau={{ n.code }}">{{ n.nom }}</a>{% endfor %}</div>
+<div class="row" style="justify-content:flex-start;flex-wrap:wrap;margin:10px 0 20px">
+<a class="btn" href="{% url 'ajouter' 'lecon' %}{% if code %}?niveau={{ code }}{% endif %}">+ Leçon</a>
+<a class="btn" href="{% url 'ajouter' 'exercice' %}{% if code %}?niveau={{ code }}{% endif %}">+ Exercice</a>
+<a class="btn" href="{% url 'ajouter' 'quiz' %}{% if code %}?niveau={{ code }}{% endif %}">+ Quiz</a></div>
+
+<h2>📚 Leçons ({{ lecons|length }})</h2>
+{% for x in lecons %}<div class="card row"><div><span class="tag">{{ x.niveau }}</span> {{ x.matiere }} · <b>{{ x.titre }}</b></div>
+<div class="row"><a href="{% url 'modifier' 'lecon' x.pk %}">Modifier</a><form method="post" action="{% url 'supprimer' 'lecon' x.pk %}" onsubmit="return confirm('Supprimer cette leçon ?')">{% csrf_token %}<button class="link d">Supprimer</button></form></div></div>
+{% empty %}<p style="color:var(--mut)">Aucune leçon.</p>{% endfor %}
+
+<h2>✏️ Exercices ({{ exercices|length }})</h2>
+{% for x in exercices %}<div class="card row"><div><span class="tag">{{ x.niveau }}</span> {{ x.matiere }} · <b>{{ x.titre }}</b></div>
+<div class="row"><a href="{% url 'modifier' 'exercice' x.pk %}">Modifier</a><form method="post" action="{% url 'supprimer' 'exercice' x.pk %}" onsubmit="return confirm('Supprimer cet exercice ?')">{% csrf_token %}<button class="link d">Supprimer</button></form></div></div>
+{% empty %}<p style="color:var(--mut)">Aucun exercice.</p>{% endfor %}
+
+<h2>🎯 Quiz ({{ quiz|length }})</h2>
+{% for x in quiz %}<div class="card row"><div><span class="tag">{{ x.niveau }}</span> {{ x.matiere }} · <b>{{ x.question }}</b></div>
+<div class="row"><a href="{% url 'modifier' 'quiz' x.pk %}">Modifier</a><form method="post" action="{% url 'supprimer' 'quiz' x.pk %}" onsubmit="return confirm('Supprimer ce quiz ?')">{% csrf_token %}<button class="link d">Supprimer</button></form></div></div>
+{% empty %}<p style="color:var(--mut)">Aucun quiz.</p>{% endfor %}
+{% endblock %}

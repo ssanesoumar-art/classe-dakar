@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Bienvenue en classe !</h1>
+<p style="color:var(--mut)">De la moyenne section au CM2 : leçons et mini-quiz. Choisis ton niveau.</p>
+<div class="grid">
+{% for n in niveaux %}<a class="card" href="{% url 'niveau' n.code %}"><div class="big">{% if n.ordre < 2 %}🧸{% else %}🎒{% endif %}</div><b>{{ n.nom }}</b><div style="color:var(--mut);font-size:.88rem">{{ n.nb_lecons }} leçon(s) · {{ n.nb_exos }} exercice(s) · {{ n.nb_quiz }} quiz</div></a>
+{% empty %}<p>Aucun niveau. Lancez <code>python manage.py seed</code>.</p>{% endfor %}
+</div>
+{% endblock %}

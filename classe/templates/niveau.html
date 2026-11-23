@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ niveau.nom }}{% endblock %}
+{% block content %}
+<h1>{{ niveau.nom }}</h1>
+<div class="chips">
+<a class="chip {% if not m %}on{% endif %}" href="?v={{ vue }}">Tout</a>
+{% for s in matieres %}<a class="chip {% if m == s.code %}on{% endif %}" href="?v={{ vue }}&m={{ s.code }}">{{ s.emoji }} {{ s.nom }}</a>{% endfor %}</div>
+<div class="tabs"><a class="tab {% if vue == 'lecons' %}on{% endif %}" href="?v=lecons&m={{ m }}">📚 Leçons</a><a class="tab {% if vue == 'exercices' %}on{% endif %}" href="?v=exercices&m={{ m }}">✏️ Exercices</a><a class="tab {% if vue == 'quiz' %}on{% endif %}" href="?v=quiz&m={{ m }}">🎯 Quiz</a></div>
+<div class="{% if petit %}kid{% endif %}">
+{% if vue == 'lecons' %}
+{% for l in lecons %}<div class="card"><div class="big">{{ l.emoji|default:"📘" }}</div><span class="tag">{{ l.matiere }}</span><h2>{{ l.titre }}</h2><p>{{ l.contenu }}</p></div>
+{% empty %}<p style="color:var(--mut)">Pas encore de leçon ici.</p>{% endfor %}
+{% elif vue == 'exercices' %}
+{% for e in exercices %}<div class="card"><div class="big">{{ e.emoji|default:"✏️" }}</div><span class="tag">{{ e.matiere }}</span><h2>{{ e.titre }}</h2><p>{{ e.consigne }}</p>
+{% if e.indice %}<details style="margin-top:10px"><summary>💡 Un indice</summary><p>{{ e.indice }}</p></details>{% endif %}
+{% if e.correction %}<details style="margin-top:8px"><summary>✅ Voir la correction</summary><p>{{ e.correction }}</p></details>{% endif %}</div>
+{% empty %}<p style="color:var(--mut)">Pas encore d’exercice ici.</p>{% endfor %}
+{% else %}
+{% csrf_token %}
+{% if not user.is_authenticated %}<div class="msg">Connecte-toi pour garder ton score. <a href="{% url 'login' %}?next={{ request.get_full_path }}">Connexion</a></div>{% endif %}
+{% if total %}<div class="card" style="background:var(--acbg)"><b><span id="bonnes">{{ bonnes }}</span> bonne(s) réponse(s) sur {{ total }}</b></div>{% endif %}
+{% for q, t in items %}
+<div class="card quiz" data-url="{% url 'repondre' q.id %}" data-reset="{% url 'recommencer' q.id %}">
+<div class="row"><span class="tag">{{ q.matiere }}</span>{% if t and user.is_authenticated %}<button class="link reset">Réessayer</button>{% endif %}</div>
+<h2>{{ q.question }}</h2>
+{% for c in q.choix.all %}<button class="opt {% if t %}{% if c.correct %}ok{% elif c.id == t.choix_id %}ko{% endif %}{% endif %}" data-choix="{{ c.id }}" {% if t %}disabled{% endif %}>{{ c.texte }}</button>{% endfor %}
+<div class="fb">{% if t %}<b class="{% if t.correct %}ok{% else %}ko{% endif %}">{% if t.correct %}Bravo, c’est juste !{% else %}Pas tout à fait.{% endif %}</b> {{ q.explication }}{% endif %}</div>
+</div>
+{% empty %}<p style="color:var(--mut)">Pas encore de quiz ici.</p>{% endfor %}
+{% endif %}
+</div>
+{% endblock %}
+{% block js %}{% if vue == 'quiz' %}<script>
+const tok=()=>document.querySelector("[name=csrfmiddlewaretoken]").value;
+document.querySelectorAll(".card.quiz").forEach(card=>{
+ card.querySelectorAll(".opt").forEach(b=>b.addEventListener("click",async()=>{
+  const f=new FormData();f.append("choix",b.dataset.choix);
+  const r=await fetch(card.dataset.url,{method:"POST",body:f,headers:{"X-CSRFToken":tok()}});
+  if(!r.ok)return;const d=await r.json();
+  card.querySelectorAll(".opt").forEach(o=>{o.disabled=true;if(+o.dataset.choix===d.bonne)o.classList.add("ok")});
+  if(!d.correct)b.classList.add("ko");
+  card.querySelector(".fb").innerHTML=`<b class="${d.correct?"ok":"ko"}">${d.correct?"Bravo, c’est juste !":"Pas tout à fait."}</b> `;
+  card.querySelector(".fb").append(d.explication||"");
+  const s=document.getElementById("bonnes");if(s&&d.correct)s.textContent=+s.textContent+1;
+ }));
+ const rs=card.querySelector(".reset");
+ if(rs)rs.addEventListener("click",async()=>{await fetch(card.dataset.reset,{method:"POST",headers:{"X-CSRFToken":tok()}});location.reload()});
+});
+</script>{% endif %}{% endblock %}

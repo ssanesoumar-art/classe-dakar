@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Statistiques de la classe</h1>
+<p style="color:var(--mut)">{{ nb_eleves }} élève(s) ayant répondu à au moins un quiz.</p>
+<div class="card" style="overflow-x:auto"><table><tr><th>Niveau</th><th>Question</th><th>Essais</th><th>Réussite</th></tr>
+{% for q in quiz %}<tr><td>{{ q.niveau }}</td><td>{{ q.question }}</td><td>{{ q.essais }}</td><td>{% if q.pct is None %}–{% else %}{{ q.pct }}%{% endif %}</td></tr>{% endfor %}</table></div>
+{% endblock %}

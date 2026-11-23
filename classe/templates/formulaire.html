@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ nom }}{% endblock %}
+{% block content %}
+<h1>{% if obj %}Modifier{% else %}Ajouter{% endif %} : {{ nom }}</h1>
+<form method="post" class="card">{% csrf_token %}
+{{ form.as_p }}
+{% if formset %}<h3>Réponses</h3><p class="helptext">Écrivez au moins 2 réponses et cochez la bonne.</p>
+{{ formset.management_form }}{{ formset.non_form_errors }}
+{% for f in formset %}{{ f.id }}<div class="opts">{{ f.texte }}<label class="chk">{{ f.correct }} Bonne réponse</label>{% if f.instance.pk %}<label class="chk">{{ f.DELETE }} Supprimer</label>{% endif %}</div>{{ f.texte.errors }}{% endfor %}{% endif %}
+<button class="btn">Enregistrer</button> <a href="{% url 'enseignant' %}" style="margin-left:12px">Annuler</a></form>
+{% endblock %}

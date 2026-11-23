@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Ma progression</h1>
+<div class="grid" style="margin-bottom:14px"><div class="card"><div class="big">{{ bonnes }}</div>bonnes réponses</div><div class="card"><div class="big">{{ pct }}%</div>réussite globale</div><div class="card"><div class="big" style="font-size:1.3rem">{{ badge }}</div>niveau</div></div>
+{% for n in niveaux %}<div class="card"><div class="row"><b>{{ n.nom }}</b><span style="color:var(--mut)">{{ n.bonnes }} / {{ n.nb_quiz }}</span></div><div class="bar"><i style="width:{{ n.pct }}%"></i></div></div>{% endfor %}
+{% endblock %}
